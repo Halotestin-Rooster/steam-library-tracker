@@ -1,45 +1,28 @@
-const fetch = (...args) => import("node-fetch").then(({default: fetch}) => fetch(...args));
-
 exports.handler = async (event) => {
     try {
         const CLIENT_ID = process.env.CLIENT_ID;
         const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
-        // 1. Get access token safely
-        const tokenRes = await fetch(
-            "https://id.twitch.tv/oauth2/token",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams({
-                    client_id: CLIENT_ID,
-                    client_secret: CLIENT_SECRET,
-                    grant_type: "client_credentials"
-                })
-            }
-        );
+        // Get access token (NO node-fetch needed)
+        const tokenRes = await fetch("https://id.twitch.tv/oauth2/token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+                client_id: CLIENT_ID,
+                client_secret: CLIENT_SECRET,
+                grant_type: "client_credentials"
+            })
+        });
 
         const tokenData = await tokenRes.json();
 
-        if (!tokenData.access_token) {
-            return {
-                statusCode: 500,
-                body: JSON.stringify({
-                    error: "Token failed",
-                    details: tokenData
-                })
-            };
-        }
-
         const accessToken = tokenData.access_token;
 
-        // 2. Parse request
         const body = JSON.parse(event.body || "{}");
-        const query = body.query || "witcher";
+        const query = body.query || "gta";
 
-        // 3. Call IGDB
         const igdbRes = await fetch("https://api.igdb.com/v4/games", {
             method: "POST",
             headers: {
@@ -50,7 +33,7 @@ exports.handler = async (event) => {
             body: `
                 search "${query}";
                 fields name, rating, first_release_date, cover.url;
-                limit 24;
+                limit 10;
             `
         });
 
@@ -64,9 +47,7 @@ exports.handler = async (event) => {
     } catch (err) {
         return {
             statusCode: 500,
-            body: JSON.stringify({
-                error: err.message
-            })
+            body: JSON.stringify({ error: err.message })
         };
     }
 };
