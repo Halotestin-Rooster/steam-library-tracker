@@ -1,6 +1,6 @@
 exports.handler = async (event) => {
-    const CLIENT_ID = process.env.CLIENT_ID;
-    const CLIENT_SECRET = process.env.CLIENT_SECRET;
+    const CLIENT_ID = "4b1p0mr66xp1f6qenzpr1w0dcd1eye";
+    const CLIENT_SECRET = "ty024vfzi9s2z62ot6ktdmk88zm96y";
 
     // Get access token
     const tokenRes = await fetch(`https://id.twitch.tv/oauth2/token`, {
